@@ -1,10 +1,11 @@
-const url = require('url')
+//const url = require('url')
 const exitHook = require('async-exit-hook')
 
 const { logproto } = require('./proto')
 const protoHelpers = require('./proto/helpers')
 const req = require('./requests')
 let snappy = false
+
 
 /**
  * A batching transport layer for Grafana Loki
@@ -14,6 +15,22 @@ let snappy = false
 class Batcher {
   loadSnappy () {
     return require('snappy')
+  }
+
+  loadUrl () {
+    let URL
+    if (window && window.URL) {
+      URL = window.URL
+    } else {
+      try {
+        const url = require('url')
+        URL = url.URL
+      } catch (_error) {
+        const url = require('url-polyfill')
+        URL = url.URL
+      }
+    }
+    return URL
   }
 
   /**
@@ -27,7 +44,7 @@ class Batcher {
     this.options = options
 
     // Construct Grafana Loki push API url
-    this.url = new url.URL(this.options.host + '/loki/api/v1/push')
+    this.url = new URL(this.options.host + '/loki/api/v1/push')
 
     // Parse basic auth parameters if given
     if (options.basicAuth) {
